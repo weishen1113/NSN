@@ -1,0 +1,138 @@
+﻿@model NSN.Models.Token
+
+<section id="save">
+    <h2 class="fw-bold mb-3">Save/Update Token</h2>
+    <div class="card shadow-sm p-4">
+        <!-- Remove asp-action/asp-controller so the form doesn't navigate on submit -->
+        <form id="tokenForm" autocomplete="off">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+
+            <!--Helpful when ModelState errors come back -->
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="Enter name" autocomplete="off" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Symbol" class="form-label"></label>
+                <input asp-for="Symbol" class="form-control" placeholder="Enter Symbol" autocomplete="off" />
+                <span asp-validation-for="Symbol" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ContractAddress" class="form-label"></label>
+                <input asp-for="ContractAddress" class="form-control" placeholder="Enter Contract Address" autocomplete="off" />
+                <span asp-validation-for="ContractAddress" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="TotalSupply" class="form-label"></label>
+                <input asp-for="TotalSupply" class="form-control" type="number" placeholder="Enter Total Supply" autocomplete="off" />
+                <span asp-validation-for="TotalSupply" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="TotalHolders" class="form-label"></label>
+                <input asp-for="TotalHolders" class="form-control" type="number" placeholder="Enter Total Holders" autocomplete="off" />
+                <span asp-validation-for="TotalHolders" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="save-btn">Save</button>
+                <!-- Use button (not native reset) so we can fully clear -->
+                <button type="button" id="btnReset" class="save-btn">Reset</button>
+            </div>
+        </form>
+
+        <div id="saveMsg" class="alert alert-success mt-3 d-none"></div>
+    </div>
+</section>
+
+@if (Context.Request.Query["clear"] == "1")
+{
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const idField = document.querySelector('#tokenForm input[name="Id"]');
+        if (idField) idField.value = ''; // force create mode when clear=1
+    });
+</script>
+}
+
+<script>
+(function () {
+  const form = document.getElementById('tokenForm');
+  const msgEl = document.getElementById('saveMsg');
+  const resetBtn = document.getElementById('btnReset');
+
+  // Helper: clear all inputs (except antiforgery token)
+    function clearForm() {
+        form.querySelectorAll('input').forEach(i => {
+            if (i.name === '__RequestVerificationToken') return;
+            i.value = '';
+        });
+        // make sure edit mode is cleared
+        const idField = form.querySelector('input[name="Id"]');
+        if (idField) idField.value = '';
+        form.querySelectorAll('.field-validation-error, .text-danger').forEach(s => s.textContent = '');
+    }
+
+  // Custom Reset
+  resetBtn.addEventListener('click', clearForm);
+
+  // Submit via AJAX
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(form));
+    if (!data.Id) data.Id = 0; // ensure create path
+
+    const csrf = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+    try {
+      const res = await fetch('@Url.Action("SaveJson","Dashboard")', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrf // must match builder.Services.AddAntiforgery(HeaderName="X-CSRF-TOKEN")
+        },
+        body: JSON.stringify(data),
+        cache: 'no-store'
+      });
+
+      if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        alert(`Save failed (status ${res.status}). ${txt}`);
+        return;
+      }
+
+      const json = await res.json();
+
+      // success message
+      msgEl.textContent = json.message ?? 'Saved';
+      msgEl.classList.remove('d-none');
+
+      // refresh SPA parts
+      if (window.refreshDetails) await window.refreshDetails();
+      if (window.refreshChart)   await window.refreshChart();
+
+      // clear form (keep anti-forgery)
+      clearForm();
+
+      // smooth scroll to the details table
+      const details = document.getElementById('details');
+      if (details?.scrollIntoView) {
+        details.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.location.href = '@Url.Action("Index","Dashboard")#details';
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Save failed (network).');
+    }
+  });
+})();
+</script>
