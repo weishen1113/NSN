@@ -1,4 +1,4 @@
-@{
+﻿@{
     var rows = (IEnumerable<NSN.Models.TokenRowVm>)ViewBag.Rows ?? Enumerable.Empty<NSN.Models.TokenRowVm>();
 }
 
@@ -45,15 +45,43 @@
                     </td>
                     <td class="text-center">
                         <!-- works now; later we can make this a JS-prefill to avoid navigation -->
-                        <a class="btn btn-sm btn-primary"
-                           asp-controller="Dashboard" asp-action="Index" asp-route-id="@r.Id">
-                            Edit
-                        </a>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a class="btn btn-sm btn-primary"
+                               asp-controller="Dashboard" asp-action="Index" asp-route-id="@r.Id">
+                                Edit
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="deleteToken(@r.Id)">
+                                Delete
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 }
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+                </table>
+                </div>
     }
 </section>
+<script>
+async function deleteToken(id) {
+    if (!confirm("Are you sure you want to delete this token?")) return;
+
+    const res = await fetch(`@Url.Action("DeleteJson", "Dashboard")/${id}`, {
+        method: "DELETE"
+    });
+
+    if (res.ok) {
+        // Option 1: remove only the row
+        document.getElementById(`row-${id}`)?.remove();
+
+        // Option 2: refresh table and chart automatically
+        if (window.refreshDetails) await window.refreshDetails();
+        if (window.refreshChart) await window.refreshChart();
+
+        alert("Token deleted successfully.");
+    } else {
+        alert("Delete failed.");
+    }
+}
+</script>
