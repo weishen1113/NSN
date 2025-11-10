@@ -1,0 +1,59 @@
+@{
+    var rows = (IEnumerable<NSN.Models.TokenRowVm>)ViewBag.Rows ?? Enumerable.Empty<NSN.Models.TokenRowVm>();
+}
+
+<section id="details">
+    <h2 class="fw-bold mb-3">Token Details</h2>
+
+    @if (!rows.Any())
+    {
+    <div class="text-center text-muted py-4">No tokens available.</div>
+    }
+    else
+    {
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-light text-center">
+                <tr>
+                    <th>Rank</th>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th>Contract Address</th>
+                    <th class="text-end">Total Holders</th>
+                    <th class="text-end">Total Supply</th>
+                    <th class="text-end">Total Supply %</th>
+                    <th class="text-center">Link</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in rows)
+                {
+                <tr>
+                    <td class="text-center">@r.Rank</td>
+                    <td>@r.Symbol</td>
+                    <td>@r.Name</td>
+                    <td class="text-break">@r.ContractAddress</td>
+                    <td class="text-end">@r.TotalHolders.ToString("N0")</td>
+                    <td class="text-end">@r.TotalSupply.ToString("N0")</td>
+                    <td class="text-end">@r.Percent.ToString("N2")%</td>
+                    <td class="text-center">
+                        <!-- Detail(string id) expects the SYMBOL -->
+                        <a asp-controller="Dashboard" asp-action="Detail" asp-route-id="@r.Symbol">
+                            @r.Symbol
+                        </a>
+                    </td>
+                    <td class="text-center">
+                        <!-- works now; later we can make this a JS-prefill to avoid navigation -->
+                        <a class="btn btn-sm btn-primary"
+                           asp-controller="Dashboard" asp-action="Index" asp-route-id="@r.Id">
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</section>
