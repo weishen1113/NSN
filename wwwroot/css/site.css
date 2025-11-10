@@ -1,0 +1,129 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    background-color: #f8f5ff; /*coral*/
+    margin: 0;
+}
+/**-----------general section--------**/
+.container {
+    max-width: 1320px;
+    margin: auto;
+    padding-left: 0px;
+    padding-right: 0px;
+    position: relative;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.small-container {
+    /**.popular-container, .featured-container, .testimonial-container, .partner-container*/
+    max-width: 1250px;
+    margin: auto;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+/**----------navbar----------**/
+img.logo {
+    width: auto;
+    height: 60px;
+    /**margin-right: 34px;*/
+}
+
+.navbar {
+    background-color: #e9e3f5;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nav1 {
+    position: relative;
+    /**margin-right: 34px;*/
+}
+
+.navbar-nav .nav-link,
+.navbar-text {
+    color: #196DDA !important;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+
+.nav-item1 {
+    text-decoration: none;
+    font-size: 15px;
+    margin-right: 15px;
+    margin-left: 15px;
+    color: #6440b4;
+}
+
+a.nav-item1.active-link {
+    color: #e61818 !important; /* or any color to highlight the active page */
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.nav1 a:hover,
+.nav2 a:hover {
+    color: #EB1111 !important;
+    text-decoration: underline;
+}
+/**----------navbar------------**/
+/**-----------footer section--------**/
+.col-md-6 .footer-link {
+        color: rgb(216, 216, 216);
+        text-decoration: none;
+        font-weight: 700;
+}
+.col-md-6 .footer-link:hover {
+    text-decoration: underline;
+}
+
+#footer-name {
+    color: rgb(216, 216, 216);
+    text-decoration: none;
+    font-weight: 700;
+}
+/**-----------footer section--------**/
+/**-------Save Update section--------*/
+.save-btn {
+    display: inline-block;
+    text-decoration: none;
+    background-color: #196DDA;
+    color: #fff;
+    padding: 8px 0px;
+    margin-top: 5px;
+    border-radius: 30px;
+    border: none;
+    transition: background 0.5s;
+    flex: 1;
+}
+
+    .save-btn:hover {
+        background-color: #66A3F2;
+        color: #2c2c2c;
+    }
+
+/**-------Save Update section--------*/
+
