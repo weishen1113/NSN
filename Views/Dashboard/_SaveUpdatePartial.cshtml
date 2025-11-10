@@ -1,0 +1,115 @@
+﻿@model NSN.Models.Token
+
+<section id="save">
+    <h2 class="fw-bold mb-3">Save/Update Token</h2>
+    <div class="card shadow-sm p-4">
+        <!-- Remove asp-action/asp-controller so the form doesn't navigate on submit -->
+        <form id="tokenForm">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+
+            <!--Helpful when ModelState errors come back -->
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="Enter name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Symbol" class="form-label"></label>
+                <input asp-for="Symbol" class="form-control" placeholder="Enter Symbol" />
+                <span asp-validation-for="Symbol" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ContractAddress" class="form-label"></label>
+                <input asp-for="ContractAddress" class="form-control" placeholder="Enter Contract Address" />
+                <span asp-validation-for="ContractAddress" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="TotalSupply" class="form-label"></label>
+                <input asp-for="TotalSupply" class="form-control" type="number" placeholder="Enter Total Supply" />
+                <span asp-validation-for="TotalSupply" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="TotalHolders" class="form-label"></label>
+                <input asp-for="TotalHolders" class="form-control" type="number" placeholder="Enter Total Holders" />
+                <span asp-validation-for="TotalHolders" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="save-btn">Save</button>
+                <!-- Use button (not native reset) so we can fully clear -->
+                <button type="button" id="btnReset" class="save-btn">Reset</button>
+            </div>
+        </form>
+
+        <div id="saveMsg" class="alert alert-success mt-3 d-none"></div>
+    </div>
+</section>
+
+<script>
+(function(){
+  const form   = document.getElementById('tokenForm');
+  const msgEl  = document.getElementById('saveMsg');
+  const resetBtn = document.getElementById('btnReset');
+
+  // Helper: clear all inputs (including hidden Id)
+  function clearForm() {
+    form.querySelectorAll('input').forEach(i => {
+      // leave the antiforgery token intact
+      if (i.name === '__RequestVerificationToken') return;
+      i.value = '';
+    });
+    // clear validation messages if any
+    form.querySelectorAll('.field-validation-error, .text-danger').forEach(s => s.textContent = '');
+  }
+
+  // Custom Reset
+  resetBtn.addEventListener('click', clearForm);
+
+  // Submit via AJAX
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(form));
+    const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+    const res = await fetch('@Url.Action("SaveJson","Dashboard")', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'RequestVerificationToken': token
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!res.ok) { alert('Save failed'); return; }
+    const json = await res.json();
+
+    // show success
+    msgEl.textContent = json.message ?? 'Saved';
+    msgEl.classList.remove('d-none');
+
+    // refresh SPA pieces
+    if (window.refreshDetails) await window.refreshDetails();
+    if (window.refreshChart)   await window.refreshChart();
+
+    // clear the form so user sees empty inputs
+    clearForm();
+
+    // jump to the View Details section
+    const details = document.getElementById('details');
+    if (details && details.scrollIntoView) {
+      details.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      // fallback to URL hash if section not found
+      window.location.href = '@Url.Action("Index","Dashboard")#details';
+    }
+  });
+})();
+</script>
