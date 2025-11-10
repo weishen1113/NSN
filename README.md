@@ -57,5 +57,5 @@ It allows administrators to create, edit, and delete token records, visualize to
 
 # User Interface Layout
 <p align="center">
-  <img src=".wwwroot/images/ui_layout.png" alt="UI Layout" width="180"/>
+  <img src=".wwwroot/images/ui_layout.png" alt="UI Layout" height="300"/>
 </p>
