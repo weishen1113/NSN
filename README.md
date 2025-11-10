@@ -22,7 +22,7 @@ It allows administrators to create, edit, and delete token records, visualize to
    git clone https://github.com/weishen1113/NSN.git
    cd NSN
    ```
-   
+
 2. **Edit `appsettings.json` to point to your MySQL instance:**
    ```bash
    "ConnectionStrings": {
@@ -49,3 +49,13 @@ It allows administrators to create, edit, and delete token records, visualize to
    ```bash
    https://localhost:5001
    ```
+
+### Optional Extension
+5. **Run the external Price Updater console app**
+   - Repository: [NSN PriceUpdater](https://github.com/weishen1113/PriceUpdater)
+   - This updates live token prices every 5 minutes in the main dashboard.
+
+# User Interface Layout
+<p align="center">
+  <img src=".wwwroot/images/ui_layout.png" alt="UI Layout" width="180"/>
+</p>
