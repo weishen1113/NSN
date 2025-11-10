@@ -1,0 +1,45 @@
+# Build output
+bin/
+obj/
+out/
+**/Properties/launchSettings.json
+
+# User-specific files
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs and temp
+*.log
+*.tlog
+*.tmp
+*.temp
+*.bak
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# ASP.NET secrets / config
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+# Environment files
+.env
+.env.*
+
+# Entity Framework migrations cache (optional)
+Migrations/**/__EFMigrationsHistory
+
+# Rider / Visual Studio generated
+*.rsuser
+*.vspscc
+.vs/
+
+# Published files
+wwwroot/dist/
+publish/
