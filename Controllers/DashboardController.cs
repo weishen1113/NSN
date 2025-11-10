@@ -19,22 +19,12 @@ namespace NSN.Controllers
         [HttpGet]
         public IActionResult Index(int? id)
         {
-            // 1️⃣ Form model
+            // 1) Form model
             var token = id.HasValue
                 ? _context.Tokens.FirstOrDefault(t => t.Id == id.Value) ?? new Token()
                 : new Token();
 
-            // 2️⃣ Chart data
-            var grouped = _context.Tokens
-                .GroupBy(t => t.Name)
-                .Select(g => new { Name = g.Key, SumSupply = g.Sum(x => (long)x.TotalSupply) })
-                .OrderByDescending(x => x.SumSupply)
-                .ToList();
-
-            ViewBag.ChartLabels = grouped.Select(x => x.Name).ToList();
-            ViewBag.ChartData = grouped.Select(x => x.SumSupply).ToList();
-
-            // 3️⃣ Table data
+            // 2) Table data (needed for initial render)
             var all = _context.Tokens.ToList();
             long total = Math.Max(1, all.Sum(t => (long)t.TotalSupply));
             var rows = all.Select(t => new TokenRowVm
@@ -53,6 +43,7 @@ namespace NSN.Controllers
             for (int i = 0; i < rows.Count; i++) rows[i].Rank = i + 1;
             ViewBag.Rows = rows;
 
+            // No need to set ViewBag.ChartLabels/Data since chart uses ChartData endpoint
             return View(token);
         }
 
@@ -92,6 +83,7 @@ namespace NSN.Controllers
                 ContractAddress = t.ContractAddress,
                 TotalHolders = t.TotalHolders,
                 TotalSupply = t.TotalSupply,
+                // Total Supply % = percentage for each token / overall total supply
                 Percent = (double)t.TotalSupply / total * 100.0
             }).OrderByDescending(r => r.Percent).ToList();
 
