@@ -22,13 +22,14 @@ It allows administrators to create, edit, and delete token records, visualize to
    git clone https://github.com/weishen1113/NSN.git
    cd NSN
    ```
+   
 2. **Edit `appsettings.json` to point to your MySQL instance:**
    ```bash
    "ConnectionStrings": {
-    "DefaultConnection": "Server=127.0.0.1;Port=3306;Database=nsn_tokens;User ID=nsn_user;Password=weishen123;TreatTinyAsBoolean=false;"
-  }
+    "DefaultConnection": "Server=127.0.0.1;Port=3306;Database=nsn_tokens;User ID=nsn_user;Password=<your_password_here>;TreatTinyAsBoolean=false;"
+    }
    ```
-   
+
 3. **Apply EF Core migrations (generate tables)**
     If your project includes EF migrations, run:
    ```bash
