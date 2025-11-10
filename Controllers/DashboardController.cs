@@ -10,21 +10,29 @@ namespace NSN.Controllers
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public DashboardController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        public DashboardController(ApplicationDbContext context) => _context = context;
 
         [HttpGet]
-        public IActionResult Index(int? id)
+        public IActionResult Index(int? id, bool? clear)
         {
-            // 1) Form model
+            // Brand click -> start with blank form
+            if (clear == true)
+            {
+                ModelState.Clear();
+                ViewBag.Rows = BuildRows();
+                return View(new Token());
+            }
+
             var token = id.HasValue
                 ? _context.Tokens.FirstOrDefault(t => t.Id == id.Value) ?? new Token()
                 : new Token();
 
-            // 2) Table data (needed for initial render)
+            ViewBag.Rows = BuildRows();
+            return View(token);
+        }
+
+        private List<TokenRowVm> BuildRows()
+        {
             var all = _context.Tokens.ToList();
             long total = Math.Max(1, all.Sum(t => (long)t.TotalSupply));
             var rows = all.Select(t => new TokenRowVm
@@ -41,13 +49,10 @@ namespace NSN.Controllers
             .ToList();
 
             for (int i = 0; i < rows.Count; i++) rows[i].Rank = i + 1;
-            ViewBag.Rows = rows;
-
-            // No need to set ViewBag.ChartLabels/Data since chart uses ChartData endpoint
-            return View(token);
+            return rows;
         }
 
-        // --------------- AJAX Endpoints ---------------
+        // -------- AJAX endpoints --------
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -56,20 +61,35 @@ namespace NSN.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(new { ok = false, message = "Invalid input" });
 
-            bool isNew = token.Id == 0;
+            if (token.Id == 0)
+            {
+                // Create
+                _context.Tokens.Add(token);
+                _context.SaveChanges();
+                return Ok(new { ok = true, message = "Token created" });
+            }
 
-            if (isNew)
-                _context.Tokens.Add(token);   // create
-            else
-                _context.Tokens.Update(token); // update
+            // Update (be tolerant if the row was deleted -> create instead)
+            var existing = _context.Tokens.FirstOrDefault(t => t.Id == token.Id);
+            if (existing == null)
+            {
+                token.Id = 0;
+                _context.Tokens.Add(token);
+                _context.SaveChanges();
+                return Ok(new { ok = true, message = "Token created" });
+            }
+
+            // Copy fields to tracked entity
+            existing.Name = token.Name;
+            existing.Symbol = token.Symbol;
+            existing.ContractAddress = token.ContractAddress;
+            existing.TotalHolders = token.TotalHolders;
+            existing.TotalSupply = token.TotalSupply;
+            existing.Price = token.Price;
 
             _context.SaveChanges();
-
-            // More natural, matching your original messages
-            string message = isNew ? "Token created" : "Token updated";
-            return Ok(new { ok = true, message });
+            return Ok(new { ok = true, message = "Token updated" });
         }
-
 
         public IActionResult DetailsPartial()
         {
@@ -83,9 +103,10 @@ namespace NSN.Controllers
                 ContractAddress = t.ContractAddress,
                 TotalHolders = t.TotalHolders,
                 TotalSupply = t.TotalSupply,
-                // Total Supply % = percentage for each token / overall total supply
                 Percent = (double)t.TotalSupply / total * 100.0
-            }).OrderByDescending(r => r.Percent).ToList();
+            })
+            .OrderByDescending(r => r.Percent)
+            .ToList();
 
             for (int i = 0; i < rows.Count; i++) rows[i].Rank = i + 1;
             ViewBag.Rows = rows;
@@ -111,8 +132,7 @@ namespace NSN.Controllers
         [HttpGet]
         public IActionResult Detail(string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
-                return NotFound();
+            if (string.IsNullOrWhiteSpace(id)) return NotFound();
 
             var t = _context.Tokens.FirstOrDefault(x => x.Symbol == id);
             if (t == null) return NotFound();
@@ -128,6 +148,18 @@ namespace NSN.Controllers
             };
 
             return View(vm);
+        }
+
+        [HttpDelete]
+        public IActionResult DeleteJson(int id)
+        {
+            var token = _context.Tokens.FirstOrDefault(t => t.Id == id);
+            if (token == null)
+                return NotFound(new { ok = false, message = "Token not found" });
+
+            _context.Tokens.Remove(token);
+            _context.SaveChanges();
+            return Ok(new { ok = true, message = "Token deleted" });
         }
     }
 }
