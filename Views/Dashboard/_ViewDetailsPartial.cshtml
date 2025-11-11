@@ -1,90 +1,124 @@
 ﻿@model List<NSN.Models.TokenRowVm>
 
-    <section id="details">
-        <h2 class="fw-bold mb-3">Token Details</h2>
+               <section id="details">
+                   <div class="d-flex justify-content-between align-items-center mb-3">
+                       <h2 class="fw-bold">Token Details</h2>
+                       <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+                   </div>
 
-        @if (Model == null || Model.Count == 0)
-  {
-        <div class="text-center text-muted py-4">No tokens available.</div>
-  }
-  else
-  {
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped align-middle">
-                <thead class="table-light text-center">
-                    <tr>
-                        <th>Rank</th>
-                        <th>Symbol</th>
-                        <th>Name</th>
-                        <th>Contract Address</th>
-                        <th class="text-end">Total Holders</th>
-                        <th class="text-end">Total Supply</th>
-                        <th class="text-end">Total Supply %</th>
-                        <th class="text-center">Link</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var r in Model)
-        {
-                    <tr id="row-@r.Id">
-                        <td class="text-center">@r.Rank</td>
-                        <td>@r.Symbol</td>
-                        <td>@r.Name</td>
-                        <td class="text-break">@r.ContractAddress</td>
-                        <td class="text-end">@r.TotalHolders.ToString("N0")</td>
-                        <td class="text-end">@r.TotalSupply.ToString("N0")</td>
-                        <td class="text-end">@r.Percent.ToString("N2")%</td>
-                        <td class="text-center">
-                            <a asp-controller="Dashboard" asp-action="Detail" asp-route-id="@r.Symbol">
-                                @r.Symbol
-                            </a>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a class="edit-button"
-                                   asp-controller="Dashboard" asp-action="Index" asp-route-id="@r.Id">
-                                    Edit
-                                </a>
-                                <button type="button" class="delete-button"
-                                        onclick="deleteToken(@r.Id)">
-                                    Delete
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-        }
-                </tbody>
-            </table>
-        </div>
-  }
-    </section>
+                   @if (Model == null || Model.Count == 0)
+                   {
+                   <div class="text-center text-muted py-4">No tokens available.</div>
+                   }
+                   else
+                   {
+                   <div class="table-responsive">
+                       <table id="tokenTable" class="table table-bordered table-striped align-middle">
+                           <thead class="table-light text-center">
+                               <tr>
+                                   <th>Rank</th>
+                                   <th>Symbol</th>
+                                   <th>Name</th>
+                                   <th>Contract Address</th>
+                                   <th class="text-end">Total Holders</th>
+                                   <th class="text-end">Total Supply</th>
+                                   <th class="text-end">Total Supply %</th>
+                                   <th class="text-center">Link</th>
+                                   <th class="text-center">Action</th>
+                               </tr>
+                           </thead>
+                           <tbody>
+                               @foreach (var r in Model)
+                               {
+                               <tr id="row-@r.Id">
+                                   <td class="text-center">@r.Rank</td>
+                                   <td>@r.Symbol</td>
+                                   <td>@r.Name</td>
+                                   <td class="text-break">@r.ContractAddress</td>
+                                   <td class="text-end">@r.TotalHolders.ToString("N0")</td>
+                                   <td class="text-end">@r.TotalSupply.ToString("N0")</td>
+                                   <td class="text-end">@r.Percent.ToString("N2")%</td>
+                                   <td class="text-center">
+                                       <a asp-controller="Dashboard" asp-action="Detail" asp-route-id="@r.Symbol">
+                                           @r.Symbol
+                                       </a>
+                                   </td>
+                                   <td class="text-center">
+                                       <div class="d-flex justify-content-center gap-2">
+                                           <a class="edit-btn"
+                                              asp-controller="Dashboard" asp-action="Index" asp-route-id="@r.Id">
+                                               Edit
+                                           </a>
+                                           <button type="button" class="delete-btn"
+                                                   onclick="deleteToken(@r.Id)">
+                                               Delete
+                                           </button>
+                                       </div>
+                                   </td>
+                               </tr>
+                               }
+                           </tbody>
+                       </table>
+                   </div>
+                   }
+               </section>
 
     <script>
-async function deleteToken(id) {
-  if (!confirm("Are you sure you want to delete this token?")) return;
+        function exportCSV() {
+            const table = document.getElementById("tokenTable");
+            if (!table) return alert("No data to export.");
 
-  // grab CSRF from the page if you enabled [ValidateAntiForgeryToken] on DELETE
-  const csrf = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const rows = Array.from(table.querySelectorAll("tr"));
+            let csv = [];
 
-  const res = await fetch(`@Url.Action("DeleteJson","Dashboard")/${id}`, {
-    method: "DELETE",
-    headers: csrf ? { "X-CSRF-TOKEN": csrf } : {}
-  });
+            rows.forEach((row, rowIndex) => {
+                const cols = Array.from(row.querySelectorAll("th, td"));
 
-  if (!res.ok) {
-    alert("Delete failed.");
-    return;
-  }
+                // Exclude the "Action" column (last one)
+                const filteredCols = cols.slice(0, -1);
 
-  // Remove just the row for snappy UX
-  const row = document.getElementById(`row-${id}`);
-  if (row) row.remove();
+                const rowData = filteredCols.map(col => {
+                    // Clean cell content (remove internal newlines, commas, etc.)
+                    const text = col.innerText.replace(/\s*\n\s*/g, " ").trim();
+                    return `"${text.replace(/"/g, '""')}"`;
+                });
 
-  // Also refresh table & chart to keep stats in sync
-  if (window.refreshDetails) await window.refreshDetails();
-  if (window.refreshChart)   await window.refreshChart();
+                csv.push(rowData.join(","));
+            });
 
-  alert("Token deleted successfully.");
-}
+            const csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "token_list.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        async function deleteToken(id) {
+            if (!confirm("Are you sure you want to delete this token?")) return;
+
+            // grab CSRF from the page if you enabled [ValidateAntiForgeryToken] on DELETE
+
+            const csrf = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            const res = await fetch(`@Url.Action("DeleteJson","Dashboard")/${id}`, {
+                method: "DELETE",
+                headers: csrf ? { "X-CSRF-TOKEN": csrf } : {}
+            });
+            if (!res.ok) {
+                alert("Delete failed.");
+                return;
+            }
+
+            // Remove just the row for snappy UX
+            const row = document.getElementById(`row-${id}`);
+            if (row) row.remove();
+
+            // Also refresh table & chart to keep stats in sync
+            if (window.refreshDetails) await window.refreshDetails();
+            if (window.refreshChart) await window.refreshChart();
+
+            alert("Token deleted successfully.");
+        }
     </script>
