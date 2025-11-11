@@ -40,8 +40,12 @@ It allows administrators to create, edit, and delete token records, visualize to
    dotnet ef migrations add InitialCreate
    dotnet ef database update
    ```
+4. **Restore dependencies**
+   ```bash
+   dotnet restore
+   ```
 
-4. **Run the application**
+5. **Run the application**
    ```bash
    dotnet run
    ```
@@ -51,7 +55,7 @@ It allows administrators to create, edit, and delete token records, visualize to
    ```
 
 ### Optional Extension
-5. **Run the external Price Updater console app**
+6. **Run the external Price Updater console app**
    - Repository: [NSN PriceUpdater](https://github.com/weishen1113/PriceUpdater)
    - This updates live token prices every 5 minutes in the main dashboard.
 
