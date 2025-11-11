@@ -2,6 +2,7 @@
 @using System.Text.Json
 @{
     ViewData["Title"] = "Dashboard";
+    var rows = (List<NSN.Models.TokenRowVm>)ViewBag.Rows;   // from controller
 }
 
 <div class="container py-4">
@@ -15,8 +16,8 @@
     </div>
 
     <div class="row g-4 mt-5">
-        <div class="col-md-12">
-            @await Html.PartialAsync("_ViewDetailsPartial")
+        <div class="col-md-12" id="detailsContainer">
+            @await Html.PartialAsync("_ViewDetailsPartial", rows)   <!--pass rows-->
         </div>
     </div>
 </div>
@@ -122,6 +123,17 @@
   window.refreshDetails = refreshDetails;
 
   document.addEventListener('DOMContentLoaded', buildChartFromServer);
+    </script>
+    <script>
+        window.refreshDetails = async function () {
+            const res = await fetch('/Dashboard/DetailsPartial', { cache: 'no-store' });
+            if (!res.ok) return;
+            document.getElementById('detailsContainer').innerHTML = await res.text();
+
+            // keep your smooth scroll behavior after save
+            document.getElementById('detailsContainer')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
     </script>
 }
 
