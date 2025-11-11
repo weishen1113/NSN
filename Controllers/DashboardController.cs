@@ -3,6 +3,7 @@ using NSN.Data;
 using NSN.Models;
 using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace NSN.Controllers
@@ -91,27 +92,33 @@ namespace NSN.Controllers
             return Ok(new { ok = true, message = "Token updated" });
         }
 
+        [HttpGet]
         public IActionResult DetailsPartial()
         {
-            var all = _context.Tokens.ToList();
-            long total = Math.Max(1, all.Sum(t => (long)t.TotalSupply));
-            var rows = all.Select(t => new TokenRowVm
-            {
-                Id = t.Id,
-                Symbol = t.Symbol,
-                Name = t.Name,
-                ContractAddress = t.ContractAddress,
-                TotalHolders = t.TotalHolders,
-                TotalSupply = t.TotalSupply,
-                Percent = (double)t.TotalSupply / total * 100.0
-            })
-            .OrderByDescending(r => r.Percent)
-            .ToList();
+            var rows = BuildRows();                   // Or AsNoTracking inside BuildRows
+            return PartialView("_ViewDetailsPartial", rows);
+        }
 
-            for (int i = 0; i < rows.Count; i++) rows[i].Rank = i + 1;
-            ViewBag.Rows = rows;
+        [HttpGet]
+        public IActionResult Detail(string id, bool? embed)
+        {
+            var token = _context.Tokens.AsNoTracking()
+                .FirstOrDefault(t => t.Symbol.ToUpper() == id.ToUpper());
+            if (token == null) return NotFound();
 
-            return PartialView("_ViewDetailsPartial");
+            var vm = new TokenDetailVm {
+                Symbol = token.Symbol,
+                Name = token.Name,
+                ContractAddress = token.ContractAddress,
+                Price = token.Price ?? 0m,
+                TotalSupply = token.TotalSupply,
+                TotalHolders = token.TotalHolders
+            };
+
+            if (embed == true || Request.Headers["X-Requested-With"] == "fetch")
+                return PartialView("DetailPartial", vm);
+
+            return View("Detail", vm);
         }
 
         public IActionResult ChartData()
@@ -129,28 +136,8 @@ namespace NSN.Controllers
             });
         }
 
-        [HttpGet]
-        public IActionResult Detail(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id)) return NotFound();
-
-            var t = _context.Tokens.FirstOrDefault(x => x.Symbol == id);
-            if (t == null) return NotFound();
-
-            var vm = new TokenDetailVm
-            {
-                Symbol = t.Symbol,
-                Name = t.Name,
-                ContractAddress = t.ContractAddress,
-                TotalHolders = t.TotalHolders,
-                TotalSupply = t.TotalSupply,
-                Price = t.Price ?? 0m
-            };
-
-            return View(vm);
-        }
-
         [HttpDelete]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteJson(int id)
         {
             var token = _context.Tokens.FirstOrDefault(t => t.Id == id);
