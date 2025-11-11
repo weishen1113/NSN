@@ -31,7 +31,7 @@ It allows administrators to create, edit, and delete token records, visualize to
    ```
 
 3. **Apply EF Core migrations (generate tables)**
-    If your project includes EF migrations, run:
+   - If your project includes EF migrations, run:
    ```bash
    dotnet ef database update
    ```
