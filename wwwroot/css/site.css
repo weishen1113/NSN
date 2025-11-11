@@ -113,20 +113,20 @@ a.nav-item1.active-link {
     background-color: #196DDA;
     color: #fff;
     padding: 8px 0px;
-    margin-top: 5px;
     border-radius: 30px;
     border: none;
     transition: background 0.5s;
     flex: 1;
 }
+
 .save-btn:hover {
     background-color: #66A3F2;
     color: #2c2c2c;
 }
 /**-------Save Update section--------*/
 /**-------View Details section--------*/
-.edit-button,
-.delete-button {
+.edit-btn,
+.delete-btn {
     display: inline-block;
     text-decoration: none;
     color: #fff;
@@ -137,23 +137,39 @@ a.nav-item1.active-link {
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.edit-button {
+.edit-btn {
     background-color: #368ADD;
 }
-.delete-button {
+.delete-btn {
     background-color: #E05858;
 }
 
-.edit-button:hover {
+.edit-btn:hover {
     background-color: #8AC3FD;
     color: #2c2c2c;
     box-shadow: 5px 6px rgba(0, 0, 0, 0.1);
 }
 
-.delete-button:hover {
+.delete-btn:hover {
     background-color: #F78989;
     color: #2c2c2c;
     box-shadow: 5px 6px rgba(0, 0, 0, 0.1); /**right bot*/
 }
-/**-------View Details section--------*/
 
+.export-btn {
+    display: inline-block;
+    text-decoration: none;
+    color: #fff;
+    padding: 8px 15px; /* Add horizontal space */
+    border: none;
+    border-radius: 30px;
+    background-color: #196DDA;
+    transition: background 0.5s;
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+.export-btn:hover {
+    background-color: #8AC3FD;
+    color: #2c2c2c;
+}
+/**-------View Details section--------*/
