@@ -1,0 +1,20 @@
+@model NSN.Models.TokenDetailVm
+<div class="container mt-4">
+    <h4 class="mb-3 text-center">Detail</h4>
+    <div class="card shadow-sm p-4">
+        <div class="col-md-12 mb-3 text-monospace fw-semibold">@Model.ContractAddress</div>
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6 fw-semibold">Price:</div>
+            <div class="col-md-6">$@Model.Price.ToString("N2")</div>
+            <div class="col-md-6 fw-semibold">Total Supply:</div>
+            <div class="col-md-6">@Model.TotalSupply.ToString("N0")</div>
+            <div class="col-md-6 fw-semibold">Total Holders:</div>
+            <div class="col-md-6">@Model.TotalHolders.ToString("N0")</div>
+            <div class="col-md-6 fw-semibold">Name:</div>
+            <div class="col-md-6">@Model.Name (@Model.Symbol)</div>
+        </div>
+    </div>
+    <div class="mt-3 text-center">
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">Back</a>
+    </div>
+</div>
