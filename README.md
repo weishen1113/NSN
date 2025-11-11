@@ -9,7 +9,7 @@ It allows administrators to create, edit, and delete token records, visualize to
 # Tech Stack
 | Category              | Tools/Libraries                             |
 | --------------------- | ------------------------------------------- |
-| Frontend  | Razor Views, Bootstrap 5, Chart.js, JavaScript (Fetch API)                                      |
+| Frontend  | Razor Views, HTML5, Bootstrap 5, Chart.js, JavaScript (Fetch API, AJAX)                                      |
 | Backend  | ASP.NET Core MVC 8.0                         |
 | Database       | MySQL with Entity Framework Core               |
 | Security       | ASP.NET Antiforgery Tokens (X-CSRF-TOKEN header)               |
